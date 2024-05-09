@@ -26,7 +26,6 @@ export default function Logo() {
     return (
         <LogoContainer>
             <LogoImage src={logo} alt='logo' />
-            <LogoText>LimpFácil</LogoText>
         </LogoContainer>
     );
 }

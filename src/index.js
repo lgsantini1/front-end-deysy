@@ -10,6 +10,8 @@ import SignUpPage from './componentes/SignUpPage';
 import Header from './componentes/Header';
 import Footer from './componentes/Footer';
 import Cliente from './componentes/Cliente';
+import Fornecedor from './componentes/Fornecedor';
+import ChatContainer from './componentes/ChatContainer'; // Assuming path to your component
 
 import FaFacebook from './imagens/facebook.png';
 import FaTwitter from './imagens/twitter.png';
@@ -57,6 +59,8 @@ ReactDOM.render(
           <Route path='/signup' element={<SignUpPage />} />
           <Route path='/' element={<Home />} />
           <Route path='/cliente' element={<Cliente />} />
+          <Route path='/fornecedor' element={<Fornecedor />} />
+          <Route path="/chat" element={<ChatContainer />} /> 
         </Routes>
       </Content>
       <Footer />

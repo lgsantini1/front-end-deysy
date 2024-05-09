@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import Login from '../componentes/SignUp/index';
+import Login from '../componentes/Login/index';
 
 
 const AppContainer = styled.div`

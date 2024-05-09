@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
-import { 
-  TextField, 
-  FormControl, 
-  InputAdornment, 
-  InputLabel, 
-  Select, 
-  MenuItem, 
+import {
+  TextField,
+  FormControl,
+  InputAdornment,
+  InputLabel,
+  Select,
+  MenuItem,
   Button,
   Avatar,
   Rating,
-  Box 
+  Box,
+  FormGroup,
+  FormControlLabel,
+  Checkbox,
+  Slider
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import clienteImagem from '../../imagens/maquina-lavar.png';
@@ -107,7 +111,15 @@ const Cliente = () => {
     pricePerDay: '',
     availability: '',
     maxDistance: 50, // Valor padrão para a distância máxima
-    category: '' // Categoria selecionada
+    category: '', // Categoria selecionada
+    availableDays: {
+      monday: false,
+      tuesday: false,
+      wednesday: false,
+      thursday: false,
+      friday: false
+    },
+    loyaltyProgram: false  // Adiciona um filtro para o programa de fidelidade
   });
   const [searchBarTop, setSearchBarTop] = useState('50%');
   const [professionalsFound, setProfessionalsFound] = useState(0);
@@ -132,6 +144,30 @@ const Cliente = () => {
     phone: '555-1234', // Exemplo de telefone
     available: i % 2 === 0 // Exemplo de disponibilidade (alterar )
   }));
+
+  const handleDayChange = (event) => {
+    setFilterValues({
+      ...filterValues,
+      availableDays: {
+        ...filterValues.availableDays,
+        [event.target.name]: event.target.checked
+      }
+    });
+  };
+
+  const handleLoyaltyChange = (event) => {
+    setFilterValues({
+      ...filterValues,
+      loyaltyProgram: event.target.checked
+    });
+  };
+
+  const handleDistanceChange = (event, newValue) => {
+    setFilterValues({
+      ...filterValues,
+      maxDistance: newValue
+    });
+  };
 
   return (
     <SearchContainer searchBarTop={searchBarTop}>
@@ -171,6 +207,47 @@ const Cliente = () => {
           Buscar
         </Button>
       </div>
+
+      {/* Filtros */}
+      <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', width: '100%' }}>
+        <FormGroup row>
+          <FormControlLabel
+            control={<Checkbox checked={filterValues.availableDays.monday} onChange={handleDayChange} name="monday" />}
+            label="Segunda"
+          />
+          <FormControlLabel
+            control={<Checkbox checked={filterValues.availableDays.tuesday} onChange={handleDayChange} name="tuesday" />}
+            label="Terça"
+          />
+          <FormControlLabel
+            control={<Checkbox checked={filterValues.availableDays.wednesday} onChange={handleDayChange} name="wednesday" />}
+            label="Quarta"
+          />
+          <FormControlLabel
+            control={<Checkbox checked={filterValues.availableDays.thursday} onChange={handleDayChange} name="thursday" />}
+            label="Quinta"
+          />
+          <FormControlLabel
+            control={<Checkbox checked={filterValues.availableDays.friday} onChange={handleDayChange} name="friday" />}
+            label="Sexta"
+          />
+        </FormGroup>
+        <FormControlLabel
+          control={<Checkbox checked={filterValues.loyaltyProgram} onChange={handleLoyaltyChange} />}
+          label="Programa de Fidelidade"
+        />
+        <div style={{ marginTop: 8 }}>
+          <InputLabel htmlFor="distance-slider">Distância Máxima (km): {filterValues.maxDistance}</InputLabel>
+          <Slider
+            value={filterValues.maxDistance}
+            onChange={handleDistanceChange}
+            aria-labelledby="distance-slider"
+            min={0}
+            max={100}
+          />
+        </div>
+      </div>
+
       {professionalsFound > 0 && <p>{professionalsFound} profissionais encontrados.</p>}
       <ProfessionalContainer>
         {professionals.map(professional => (

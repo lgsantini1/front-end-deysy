@@ -1,22 +1,34 @@
-// auth.js
+import axios from 'axios';
 
-// Função de login que simula a autenticação com um número de telefone e senha
 export const login = async (phoneNumber, password) => {
-    // Aqui você pode implementar a lógica de autenticação real, como fazer uma chamada para um servidor
-    // Por enquanto, estamos apenas simulando um tempo de espera de 1 segundo antes de resolver a promessa
-    await new Promise(resolve => setTimeout(resolve, 1000));
 
-    // Simulando a verificação de credenciais
-    if (phoneNumber === '123456789' && password === 'senha123') {
-        // Se as credenciais estiverem corretas, retornamos um objeto de usuário
-        return {
-            id: 1,
-            nome: 'Usuário',
-            telefone: phoneNumber
-            // Você pode adicionar mais informações do usuário aqui, se necessário
-        };
-    } else {
-        // Se as credenciais estiverem incorretas, lançamos um erro
-        throw new Error('Credenciais inválidas');
+    const phoneNumberClean = phoneNumber.replace(/[^0-9]/g, '');
+
+    try {
+
+        const response = await axios.get(`http://localhost:8000/usuarios/telefone/${phoneNumberClean}`);
+        
+
+        if (response.data && response.data.telefone === phoneNumberClean) {
+            
+            if (password === response.data.senha) {
+
+                return {
+                    idusuario: response.data.idusuario,
+                    nomeusuario: response.data.nomeusuario,
+                    telefone: response.data.telefone,
+                    tipousuario: response.data.tipousuario
+                };
+            } else {
+
+                throw new Error('Credenciais inválidas');
+            }
+        } else {
+
+            throw new Error('Credenciais inválidas');
+        }
+    } catch (err) {
+        console.error('Erro ao tentar login:', err);
+        throw new Error('Falha ao autenticar usuário');
     }
 };

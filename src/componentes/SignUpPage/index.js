@@ -123,23 +123,73 @@ const SignUpPage = () => {
   };
 
   const handleCEPChange = async (event) => {
-    const cep = event.target.value;
-    try {
-      const response = await axios.get(`https://viacep.com.br/ws/${cep}/json/`);
-      const { logradouro, localidade, uf } = response.data;
-      setUserData({ ...userData, endereco: logradouro, cidade: localidade, estado: uf });
-    } catch (error) {
-      console.error('Erro ao consultar o CEP:', error);
+    const cep = event.target.value.replace(/\D/g, ''); // Remove non-numeric characters
+    setUserData({ ...userData, cep }); // Atualiza o CEP em tempo real
+  
+    if (cep.length === 8) {
+      if (!/^[0-9]{8}$/.test(cep)) {
+        setErrors({ ...errors, cep: 'Formato de CEP inválido.' });
+        return;
+      }
+      try {
+        const response = await axios.get(`https://viacep.com.br/ws/${cep}/json/`);
+        const { data } = response;
+        if (data.erro) {
+          setErrors({ ...errors, cep: 'CEP não encontrado.' });
+          return;
+        }
+        const { logradouro, localidade, uf } = data;
+        if (logradouro && localidade && uf) {
+          setUserData({
+            ...userData,
+            endereco: logradouro,
+            cidade: localidade,
+            estado: uf
+          });
+          setErrors({ ...errors, cep: null }); // Clear the error on success
+        } else {
+          setErrors({ ...errors, cep: 'Dados de endereço incompletos.' });
+        }
+      } catch (error) {
+        setErrors({ ...errors, cep: 'Erro ao consultar o CEP.' });
+      }
+    } else {
+      // Se o CEP ainda não tem 8 dígitos, pode-se limpar possíveis erros anteriores.
+      setErrors({ ...errors, cep: null });
     }
   };
-
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     if (validateForm()) {
-      console.log(userData);
-      // Envie os dados para onde você precisar
+      const requestBody = {
+        nomeusuario: userData.nome,
+        Telefone: userData.telefone,
+        Email: userData.email,
+        Cpf: userData.cpf,
+        Senha: userData.senha,
+        TipoUsuario: userData.tipoUsuario,
+        InformacoesContato: userData.informacoesContato,
+        CEP: userData.cep,
+        Endereco: userData.endereco,
+        Cidade: userData.cidade,
+        Estado: userData.estado,
+        DataDeNascimento: formatData(userData.dataNascimento) // Formate conforme necessário
+      };
+      try {
+        const response = await axios.post('http://localhost:8000/usuarios', requestBody);
+        console.log('Cadastro realizado com sucesso:', response.data);
+        window.location.href = 'http://localhost:3000/';
+      } catch (error) {
+        // Verifica se a resposta e os dados estão disponíveis
+        const errorMessage = error.response && error.response.data && error.response.data.message
+          ? error.response.data.message
+          : 'Erro desconhecido ao enviar dados. Por favor, tente novamente.';
+        alert(errorMessage); // Substitua pelo método de exibição de erro que preferir
+      }
     }
   };
+  
+  
 
   const validateForm = () => {
     const { nome, email, senha, confirmarSenha, tipoUsuario, cpf, dataNascimento } = userData;
@@ -184,7 +234,11 @@ const SignUpPage = () => {
     setErrors(errors);
     return isValid;
   };
-
+  // Função para formatar a data para o formato ISO yyyy-mm-dd
+  const formatData = (data) => {
+    const parts = data.split('/');
+    return `${parts[2]}-${parts[1]}-${parts[0]}`; // Converte dd/mm/yyyy para yyyy-mm-dd
+  };
   return (
     <SignUpPageContainer>
       <SignUpForm onSubmit={handleSubmit}>
@@ -267,7 +321,9 @@ const SignUpPage = () => {
           placeholder="CEP"
           value={userData.cep}
           onChange={handleCEPChange}
+          hasError={!!errors.cep}
         />
+        {errors.cep && <ErrorMessage>{errors.cep}</ErrorMessage>}
         <Input
           type="text"
           name="endereco"

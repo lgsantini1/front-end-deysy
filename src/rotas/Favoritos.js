@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useState } from 'react';
 import styled from 'styled-components'
 import { deleteFavorito, getFavoritos } from '../servicos/favoritos';
-import livroImg from '../imagens/livro.png'
+
 
 const AppContainer = styled.div`
     width: 100vw;
@@ -71,7 +71,6 @@ function Favoritos() {
             favoritos.length !== 0 ? favoritos.map(favorito => (
               <Resultado onClick={() => deletaFavorito(favorito.id)}>
                 <p>{favorito.nome}</p>
-                <img src={livroImg}/>
               </Resultado>
             )) : null
           }

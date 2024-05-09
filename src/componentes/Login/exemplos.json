@@ -1,0 +1,14 @@
+{
+    "nomeusuario": "Maria Oliveira",
+    "Telefone": "11998765432",
+    "Email": "maria.oliveira@email.com",
+    "Cpf": "98765432109",
+    "Senha": "minhasenha456",
+    "TipoUsuario": "Cliente",
+    "InformacoesContato": "Sou uma cliente que busca serviços de qualidade",
+    "CEP": "01320100",
+    "Endereco": "Rua da Paz, 456",
+    "Cidade": "São Paulo",
+    "Estado": "SP",
+    "DataDeNascimento": "1992-08-20"
+}

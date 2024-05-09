@@ -1,9 +1,8 @@
-// Importe as bibliotecas necessárias
 import React, { useState } from 'react';
 import styled, { keyframes } from 'styled-components';
-import Input from '../Input/Index'; // Correção: "index" deve ser minúsculo
+import Input from '../Input/Index';
 import { login } from '../../servicos/auth';
-import loginImage from '../../imagens/login-image.png'; // Importando a imagem de login
+import loginImage from '../../imagens/login-image.png';
 
 // Defina a animação de entrada
 const slideIn = keyframes`
@@ -81,15 +80,15 @@ const ErrorMessage = styled.p`
 `;
 
 const StyledInput = styled(Input)`
-  border: 1px solid #ccc; /* Cor da borda */
-  border-radius: 4px; /* Borda arredondada */
-  padding: 10px; /* Espaçamento interno */
-  width: 100%; /* Largura total */
-  margin-bottom: 10px; /* Espaçamento inferior */
-  transition: border-color 0.3s ease; /* Transição suave da cor da borda */
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 10px;
+  width: 100%;
+  margin-bottom: 10px;
+  transition: border-color 0.3s ease;
 
   &:focus {
-    border-color: #007bff; /* Cor da borda quando focado */
+    border-color: #007bff;
   }
 `;
 
@@ -105,29 +104,33 @@ const LoginImage = styled.img`
   max-height: 300px;
 `;
 
-// Componente LoginPage
 const LoginPage = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  // Função para lidar com a mudança no número de telefone
   const handlePhoneNumberChange = (event) => {
     setPhoneNumber(event.target.value);
   };
 
-  // Função para lidar com o envio do formulário
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      await login(phoneNumber, password);
-      alert('Login bem-sucedido! Redirecionando...');
+        // A função login agora retorna os dados necessários
+        const userData = await login(phoneNumber, password);
+        alert('Login bem-sucedido! Redirecionando...');
+        // Verificamos o tipo de usuário para decidir a rota
+        console.log(userData.tipousuario);
+        if (userData.tipousuario.toLowerCase() === "cliente") {
+            window.location.href = 'http://localhost:3000/cliente';
+        } else if (userData.tipousuario.toLowerCase() === "fornecedor") {
+            window.location.href = 'http://localhost:3000/fornecedor';
+        }
     } catch (error) {
-      setError('Credenciais inválidas. Por favor, tente novamente.');
+        setError('Falha no login. Tente novamente.');
     }
-  };
+};
 
-  // Renderização do componente
   return (
     <LoginContainer>
       <LoginImageContainer>
