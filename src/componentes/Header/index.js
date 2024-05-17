@@ -3,8 +3,9 @@ import OpcoesHeader from '../OpcoesHeader/index.js';
 import Logo from '../Logo/index.js';
 import IconesHeader from '../IconesHeader/index.js';
 import styled from 'styled-components';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { RiLogoutCircleRLine } from 'react-icons/ri'; // Importar o ícone de logout
+import { useAuth } from '../../contexts/AuthContext';
 
 const HeaderContainer = styled.header`
     background-color: #0E3242;
@@ -28,23 +29,34 @@ const PageContent = styled.div`
     margin-top: 70px; /* Ajuste conforme a altura do cabeçalho */
     /* Adicione outros estilos de layout conforme necessário */
 `
+const WelcomeMessage = styled.div`
+  font-size: 16px;
+  color: white;
+  margin-left: auto; /* Empurra a mensagem para o lado direito */
+  margin-right: 20px; /* Espaçamento à direita */
+`;
 
 export default function Header() {
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
+
     const handleLogout = () => {
-        // Implemente a lógica de logout aqui
+        logout();
+        navigate('/login');
     }
 
     return (
         <>
             <HeaderContainer>
                 <LogoutIcon onClick={handleLogout}>
-                    <RiLogoutCircleRLine size={24} color="#fff" />
+                    <RiLogoutCircleRLine size={35} color="#fff" />
                 </LogoutIcon>
                 <Link to='/'>
                     <Logo />
                 </Link>
                 <OpcoesHeader />
                 <IconesHeader />
+                {user && <WelcomeMessage>Olá, {user.nome}. Seja Bem-vindo!</WelcomeMessage>}
             </HeaderContainer>
             <PageContent>
                 {/* Conteúdo da página aqui */}

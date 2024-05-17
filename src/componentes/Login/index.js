@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import styled, { keyframes } from 'styled-components';
 import Input from '../Input/Index.js';
-import { login } from '../../servicos/auth.js';
+import { useAuth } from '../../contexts/AuthContext';
 import loginImage from '../../imagens/login-image.png';
 import loginBackground from '../../imagens/fundo-tela-login.jpeg';
+import { login } from '../../servicos/auth.js';
 
 // Defina a animação de entrada
 const slideIn = keyframes`
@@ -27,6 +28,7 @@ const LoginContainer = styled.section`
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  padding-top: 60px; /* Espaço para o header fixo */
 `;
 
 const LoginForm = styled.form`
@@ -88,7 +90,7 @@ const StyledInput = styled(Input)`
   border: 1px solid #ccc;
   border-radius: 4px;
   padding: 10px;
-  width: 50%;
+  width: 100%;
   margin-bottom: 10px;
   transition: border-color 0.3s ease;
 
@@ -109,14 +111,29 @@ const LoginImageContainer = styled.div`
 `;
 
 const LoginImage = styled.img`
-  max-width: 300;
-  max-height: 300;
+  max-width: 300px;
+  max-height: 300px;
+`;
+
+const HeaderContainer = styled.header`
+  width: 100%;
+  background-color: #2c3e50;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
 `;
 
 const LoginPage = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const { user, loginContext, logout } = useAuth();
 
   const handlePhoneNumberChange = (event) => {
     setPhoneNumber(event.target.value);
@@ -125,50 +142,56 @@ const LoginPage = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-        const userData = await login(phoneNumber, password);
-        alert('Login bem-sucedido! Redirecionando...');
-        console.log(userData.tipousuario);
-        if (userData.tipousuario.toLowerCase() === "cliente") {
-            window.location.href = 'http://localhost:3000/cliente';
-        } else if (userData.tipousuario.toLowerCase() === "fornecedor") {
-            window.location.href = 'http://localhost:3000/fornecedor';
-        }
+      const userData = await login(phoneNumber, password);
+      console.log('User Data:', userData); // Adicione um log para verificar os dados do usuário
+      loginContext(userData); // Chama a função login do contexto
+      alert('Login bem-sucedido! Redirecionando...');
+      if (userData.tipousuario && userData.tipousuario.toLowerCase() === "cliente") {
+        window.location.href = '/cliente';
+      } else if (userData.tipousuario && userData.tipousuario.toLowerCase() === "fornecedor") {
+        window.location.href = '/fornecedor';
+      } else {
+        throw new Error('Tipo de usuário inválido');
+      }
     } catch (error) {
-        setError('Falha no login. Tente novamente.');
+      console.error('Erro no login:', error); // Adicione um log para verificar o erro
+      setError('Falha no login. Tente novamente.');
     }
   };
 
   return (
-    <LoginContainer>
-      <LoginImageContainer>
-        <LoginImage src={loginImage} alt="Login Image" />
-      </LoginImageContainer>
-      <LoginForm onSubmit={handleSubmit}>
-        <Title>Qual o seu número de telefone?</Title>
-        <label htmlFor="phone">Telefone</label>
-        <StyledInput
-          id="phone"
-          type="tel"
-          placeholder="Telefone"
-          value={phoneNumber}
-          onChange={handlePhoneNumberChange}
-        />
-        <label htmlFor="password">Senha</label>
-        <StyledInput
-          id="password"
-          type="password"
-          placeholder="Senha"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <Button type="submit">Entrar</Button>
-        {error && <ErrorMessage>{error}</ErrorMessage>}
-      </LoginForm>
-      <SignUpContainer>
-        <SignUpText>Você não tem uma conta? Clique em:</SignUpText>
-        <SignUpLink href="/signup">Registre-se Grátis</SignUpLink>
-      </SignUpContainer>
-    </LoginContainer>
+    <div>
+      <LoginContainer>
+        <LoginImageContainer>
+          <LoginImage src={loginImage} alt="Login Image" />
+        </LoginImageContainer>
+        <LoginForm onSubmit={handleSubmit}>
+          <Title>Qual o seu número de telefone?</Title>
+          <label htmlFor="phone">Telefone</label>
+          <StyledInput
+            id="phone"
+            type="tel"
+            placeholder="Telefone"
+            value={phoneNumber}
+            onChange={handlePhoneNumberChange}
+          />
+          <label htmlFor="password">Senha</label>
+          <StyledInput
+            id="password"
+            type="password"
+            placeholder="Senha"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <Button type="submit">Entrar</Button>
+          {error && <ErrorMessage>{error}</ErrorMessage>}
+        </LoginForm>
+        <SignUpContainer>
+          <SignUpText>Você não tem uma conta? Clique em:</SignUpText>
+          <SignUpLink href="/signup">Registre-se Grátis</SignUpLink>
+        </SignUpContainer>
+      </LoginContainer>
+    </div>
   );
 };
 
