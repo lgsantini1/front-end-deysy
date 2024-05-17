@@ -15,7 +15,7 @@ import {
   Checkbox,
   Slider
 } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
+import SearchIcon from '@mui/icons-material/Search.js';
 import clienteImagem from '../../imagens/maquina-lavar.png';
 import styled, { keyframes } from 'styled-components';
 import pessoaGenerica from '../../imagens/pessoa-generica.png'; // Importe a imagem genérica

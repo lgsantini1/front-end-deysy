@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import styled, { keyframes } from 'styled-components';
-import Input from '../Input/Index';
-import { login } from '../../servicos/auth';
+import Input from '../Input/Index.js';
+import { login } from '../../servicos/auth.js';
 import loginImage from '../../imagens/login-image.png';
+import loginBackground from '../../imagens/fundo-tela-login.jpeg';
 
 // Defina a animação de entrada
 const slideIn = keyframes`
@@ -18,7 +19,9 @@ const slideIn = keyframes`
 
 // Estilos para o formulário de login
 const LoginContainer = styled.section`
-  background-color: #f0f0f0;
+  background-image: url(${loginBackground}); 
+  background-size: cover; 
+  background-position: center; 
   height: 100vh;
   display: flex;
   justify-content: center;
@@ -27,14 +30,15 @@ const LoginContainer = styled.section`
 `;
 
 const LoginForm = styled.form`
-  background-color: #fff;
+  background-color: rgba(120, 200, 255, 0.5); 
   padding: 20px;
-  border-radius: 8px;
+  border-radius: 70px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
   align-items: center;
   animation: ${slideIn} 0.5s ease forwards;
+  width: 25%; 
 `;
 
 const Title = styled.h1`
@@ -43,8 +47,8 @@ const Title = styled.h1`
 `;
 
 const Button = styled.button`
-  width: 100%;
-  background-color: #007bff;
+  width: 50%;
+  background-color: purple; 
   color: #fff;
   padding: 10px;
   border: none;
@@ -66,11 +70,12 @@ const SignUpContainer = styled.div`
 
 const SignUpText = styled.span`
   margin-right: 5px;
+  color: white;
 `;
 
 const SignUpLink = styled.a`
   text-decoration: none;
-  color: #007bff;
+  color: white;
   cursor: pointer;
 `;
 
@@ -83,7 +88,7 @@ const StyledInput = styled(Input)`
   border: 1px solid #ccc;
   border-radius: 4px;
   padding: 10px;
-  width: 100%;
+  width: 50%;
   margin-bottom: 10px;
   transition: border-color 0.3s ease;
 
@@ -97,11 +102,15 @@ const LoginImageContainer = styled.div`
   justify-content: center;
   align-items: center;
   margin-bottom: 20px;
+
+  img {
+    mix-blend-mode: multiply;  
+  }
 `;
 
 const LoginImage = styled.img`
-  max-width: 300px;
-  max-height: 300px;
+  max-width: 300;
+  max-height: 300;
 `;
 
 const LoginPage = () => {
@@ -116,10 +125,8 @@ const LoginPage = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-        // A função login agora retorna os dados necessários
         const userData = await login(phoneNumber, password);
         alert('Login bem-sucedido! Redirecionando...');
-        // Verificamos o tipo de usuário para decidir a rota
         console.log(userData.tipousuario);
         if (userData.tipousuario.toLowerCase() === "cliente") {
             window.location.href = 'http://localhost:3000/cliente';
@@ -129,7 +136,7 @@ const LoginPage = () => {
     } catch (error) {
         setError('Falha no login. Tente novamente.');
     }
-};
+  };
 
   return (
     <LoginContainer>
@@ -138,13 +145,17 @@ const LoginPage = () => {
       </LoginImageContainer>
       <LoginForm onSubmit={handleSubmit}>
         <Title>Qual o seu número de telefone?</Title>
+        <label htmlFor="phone">Telefone</label>
         <StyledInput
+          id="phone"
           type="tel"
           placeholder="Telefone"
           value={phoneNumber}
           onChange={handlePhoneNumberChange}
         />
+        <label htmlFor="password">Senha</label>
         <StyledInput
+          id="password"
           type="password"
           placeholder="Senha"
           value={password}
@@ -155,7 +166,7 @@ const LoginPage = () => {
       </LoginForm>
       <SignUpContainer>
         <SignUpText>Você não tem uma conta? Clique em:</SignUpText>
-        <SignUpLink href="/signup">Cadastre-se</SignUpLink>
+        <SignUpLink href="/signup">Registre-se Grátis</SignUpLink>
       </SignUpContainer>
     </LoginContainer>
   );

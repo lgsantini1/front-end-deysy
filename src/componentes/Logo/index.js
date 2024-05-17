@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import logo from '../../imagens/icone_header.jpg';
+import logo from '../../imagens/icone_header.png';
 
 const LogoContainer = styled.div`
     display: flex;

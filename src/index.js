@@ -4,14 +4,13 @@ import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import { createGlobalStyle } from 'styled-components';
 import styled from 'styled-components'; // Certifique-se de importar styled-components desta maneira
 
-import Home from './rotas/Home';
-import Favoritos from './rotas/Favoritos';
-import SignUpPage from './componentes/SignUpPage';
-import Header from './componentes/Header';
-import Footer from './componentes/Footer';
-import Cliente from './componentes/Cliente';
-import Fornecedor from './componentes/Fornecedor';
-import ChatContainer from './componentes/ChatContainer'; // Assuming path to your component
+import Home from './rotas/Home.js';
+import SignUpPage from './componentes/SignUpPage/index.js';
+import Header from './componentes/Header/index.js';
+import Footer from './componentes/Footer/index.js';
+import Cliente from './componentes/Cliente/index.js';
+import Fornecedor from './componentes/Fornecedor/index.js';
+import ChatContainer from './componentes/ChatContainer/index.js'; // Assuming path to your component
 
 import FaFacebook from './imagens/facebook.png';
 import FaTwitter from './imagens/twitter.png';
@@ -55,7 +54,6 @@ ReactDOM.render(
       <Header />
       <Content>
         <Routes>
-          <Route path='/favoritos' element={<Favoritos />} />
           <Route path='/signup' element={<SignUpPage />} />
           <Route path='/' element={<Home />} />
           <Route path='/cliente' element={<Cliente />} />

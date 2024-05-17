@@ -1,7 +1,7 @@
 import React from 'react';
-import OpcoesHeader from '../OpcoesHeader';
+import OpcoesHeader from '../OpcoesHeader/index.js';
 import Logo from '../Logo/index.js';
-import IconesHeader from '../IconesHeader';
+import IconesHeader from '../IconesHeader/index.js';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import { RiLogoutCircleRLine } from 'react-icons/ri'; // Importar o ícone de logout

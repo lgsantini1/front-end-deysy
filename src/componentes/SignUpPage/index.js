@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import styled, { css } from 'styled-components';
 import axios from 'axios';
 import 'jquery-ui/themes/base/all.css';
-import 'jquery-ui/ui/widgets/datepicker';
+import 'jquery-ui/ui/widgets/datepicker.js';
 import $ from 'jquery';
 
 const SignUpPageContainer = styled.div`
