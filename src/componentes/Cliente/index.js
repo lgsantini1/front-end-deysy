@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   TextField,
   FormControl,
@@ -13,82 +13,112 @@ import {
   FormGroup,
   FormControlLabel,
   Checkbox,
-  Slider
+  Slider,
+  CircularProgress
 } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search.js';
+import SearchIcon from '@mui/icons-material/Search';
 import clienteImagem from '../../imagens/maquina-lavar.png';
-import styled, { keyframes } from 'styled-components';
-import pessoaGenerica from '../../imagens/pessoa-generica.png'; // Importe a imagem genérica
+import styled from 'styled-components';
+import pessoaGenerica from '../../imagens/pessoa-generica.png';
+import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+import icon from 'leaflet/dist/images/marker-icon.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 
-// Define a animação para as bolhas de sabão
-const bubbleAnimation = keyframes`
-  0% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-  50% {
-    transform: translateY(-100vh);
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(-200vh);
-    opacity: 0;
-  }
-`;
+// Configura o ícone do Leaflet
+const DefaultIcon = L.icon({
+  iconUrl: icon,
+  shadowUrl: iconShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
+L.Marker.prototype.options.icon = DefaultIcon;
 
-// Componente estilizado para a bolha de sabão
-const Bubble = styled.div`
-  position: absolute;
-  width: ${props => props.size}px;
-  height: ${props => props.size}px;
-  background-color: rgba(255, 255, 255, 0.8);
-  border-radius: 50%;
-  animation: ${bubbleAnimation} 6s linear forwards;
-  animation-delay: ${props => props.delay}s;
-  filter: brightness(150%);
-`;
+const roxoRosado = '#b356a6';
 
 const SearchContainer = styled.div`
-  position: absolute;
-  top: ${props => props.searchBarTop}px;
-  left: 50%;
-  transform: translateX(-50%);
-  transition: top 0.5s ease-in-out; /* Adiciona uma transição suave */
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  background-color: white;
-  padding: 16px;
-  border-radius: 8px;
-  z-index: 1;
-`;
-
-const ProfessionalContainer = styled.div`
-  margin-top: 20px;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-`;
-
-const ProfessionalCard = styled.div`
-  width: 250px;
-  height: 300px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  margin: 10px;
+  background-color: rgba(255, 255, 255, 0.95);
   padding: 20px;
-  text-align: center; // Centraliza o conteúdo do card
-  position: relative; // Para posicionar o círculo de disponibilidade
-  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3); // Efeito de sombra 3D
-  transition: transform 0.2s ease-in-out; // Adiciona uma transição suave
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 500px;
+  margin-bottom: 20px;
+`;
 
-  &:hover {
-    transform: translateY(-5px); // Efeito de elevação ao passar o mouse
+const FieldGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 16px;
+
+  @media (min-width: 600px) {
+    flex-direction: row;
+    flex-wrap: wrap;
   }
 `;
 
-// Círculo de disponibilidade
+const FieldWrapper = styled.div`
+  flex: 1;
+  min-width: 200px;
+  margin-bottom: 16px;
+`;
+
+const ProfessionalListContainer = styled.div`
+  width: 100%;
+  max-height: 70vh;
+  overflow-y: auto;
+  background-color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  padding: 20px;
+  margin-right: 20px;
+
+  @media (max-width: 768px) {
+    max-height: none;
+    margin-right: 0;
+    margin-bottom: 20px;
+  }
+`;
+
+const MapWrapper = styled.div`
+  height: 70vh;
+  width: 50%;
+  position: relative;
+
+  @media (max-width: 1200px) {
+    width: 100%;
+    height: 50vh;
+  }
+
+  @media (max-width: 768px) {
+    height: 40vh;
+  }
+`;
+
+const ProfessionalCard = styled.div`
+  width: 100%;
+  max-width: 250px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  margin: 10px auto;
+  padding: 20px;
+  text-align: center;
+  position: relative;
+  box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s ease-in-out;
+
+  &:hover {
+    transform: translateY(-5px);
+  }
+`;
+
 const AvailabilityCircle = styled.div`
   position: absolute;
   top: 10px;
@@ -100,50 +130,55 @@ const AvailabilityCircle = styled.div`
 `;
 
 const AppContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-image: url(${clienteImagem});
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  align-items: center;
+  justify-content: center;
   position: relative;
   overflow: hidden;
+  padding: 20px;
 `;
 
-const Cliente = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterValues, setFilterValues] = useState({
-    value: '',
-    pricePerDay: '',
-    availability: '',
-    maxDistance: 50, // Valor padrão para a distância máxima
-    category: '', // Categoria selecionada
-    availableDays: {
-      monday: false,
-      tuesday: false,
-      wednesday: false,
-      thursday: false,
-      friday: false
-    },
-    loyaltyProgram: false  // Adiciona um filtro para o programa de fidelidade
-  });
-  const [searchBarTop, setSearchBarTop] = useState('50%');
-  const [professionalsFound, setProfessionalsFound] = useState(0);
+const ContentContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  flex-grow: 1;
+  width: 100%;
+  max-width: 1200px;
+  align-items: flex-start;
+  justify-content: space-between;
 
-  const handleSearch = () => {
-    console.log("Pesquisando por:", searchQuery);
-    console.log("Filtros:", filterValues);
+  @media (max-width: 1200px) {
+    flex-direction: column;
+    align-items: center;
+  }
+`;
 
-    // Simulando busca de profissionais no banco
-    const found = Math.floor(Math.random() * 10); // Simulação de quantidade de profissionais encontrados
-    setProfessionalsFound(found);
+const Sidebar = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 45%;
+  padding: 20px;
 
-    // Animar a barra de pesquisa para cima
-    setSearchBarTop('20%');
-  };
+  @media (max-width: 1200px) {
+    width: 100%;
+  }
+`;
 
-  const professionals = Array.from({ length: professionalsFound }, (_, i) => ({
-    id: i + 1,
-    name: `Profissional ${i + 1}`,
-    photoUrl: i % 2 === 0 ? `https://i.pravatar.cc/150?img=${i + 1}` : null, // Exemplo de URL de foto (alterar fonte de imagens)
-    rating: Math.floor(Math.random() * 6), // Geração aleatória da avaliação (0 a 5)
-    phone: '555-1234', // Exemplo de telefone
-    available: i % 2 === 0 // Exemplo de disponibilidade (alterar )
-  }));
+const Footer = styled.footer`
+  padding: 20px;
+  background: #333;
+  color: #fff;
+  text-align: center;
+  width: 100%;
+`;
+
+const Cliente = ({ professionals, handleSearch, searchQuery, setSearchQuery, filterValues, setFilterValues, searchBarTop }) => {
 
   const handleDayChange = (event) => {
     setFilterValues({
@@ -170,117 +205,248 @@ const Cliente = () => {
   };
 
   return (
-    <SearchContainer searchBarTop={searchBarTop}>
-      <h2 style={{ fontSize: 19, fontFamily: 'Arial, sans-serif', color: '#333', marginBottom: 16 }}>Contrate um profissional de limpeza com apenas alguns cliques.</h2>
-      <div style={{ display: 'flex', alignItems: 'center' }}>
-        <TextField
-          label="Pesquisar"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          variant="outlined"
-          size="small"
-          style={{ width: 540 }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            )
-          }}
-        />
-        <FormControl variant="outlined" style={{ marginLeft: 8, width: 150 }}>
-          <InputLabel id="category-filter-label">Categoria</InputLabel>
-          <Select
-            labelId="category-filter-label"
-            value={filterValues.category}
-            onChange={(e) => setFilterValues({ ...filterValues, category: e.target.value })}
-            label="Categoria"
-          >
-            <MenuItem value="">Todas</MenuItem>
-            <MenuItem value="Interna">Limpeza Interna</MenuItem>
-            <MenuItem value="Externa">Limpeza Externa</MenuItem>
-            <MenuItem value="Comércio">Limpeza Comércio</MenuItem>
-            <MenuItem value="Indústria">Limpeza Industria</MenuItem>
-          </Select>
-        </FormControl>
-        <Button variant="contained" color="primary" onClick={handleSearch} style={{ marginLeft: 8 }}>
-          Buscar
-        </Button>
-      </div>
+    <SearchContainer style={{ top: searchBarTop }}>
+      <h2 style={{ fontSize: 20, fontFamily: 'Arial, sans-serif', color: '#333', marginBottom: 16, textAlign: 'center' }}>
+        Contrate um profissional de limpeza com apenas alguns cliques.
+      </h2>
+      <FieldGroup>
+        <FieldWrapper>
+          <TextField
+            label="Pesquisar"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            variant="outlined"
+            size="small"
+            fullWidth
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon style={{ color: roxoRosado }} />
+                </InputAdornment>
+              )
+            }}
+          />
+        </FieldWrapper>
+        <FieldWrapper>
+          <FormControl variant="outlined" fullWidth>
+            <InputLabel id="category-filter-label">Categoria</InputLabel>
+            <Select
+              labelId="category-filter-label"
+              value={filterValues.category}
+              onChange={(e) => setFilterValues({ ...filterValues, category: e.target.value })}
+              label="Categoria"
+              style={{ color: roxoRosado }}
+            >
+              <MenuItem value="">Todas</MenuItem>
+              <MenuItem value="Interna">Limpeza Interna</MenuItem>
+              <MenuItem value="Externa">Limpeza Externa</MenuItem>
+              <MenuItem value="Comércio">Limpeza Comércio</MenuItem>
+              <MenuItem value="Indústria">Limpeza Indústria</MenuItem>
+            </Select>
+          </FormControl>
+        </FieldWrapper>
+      </FieldGroup>
 
-      {/* Filtros */}
-      <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', width: '100%' }}>
+      <FieldGroup>
         <FormGroup row>
           <FormControlLabel
             control={<Checkbox checked={filterValues.availableDays.monday} onChange={handleDayChange} name="monday" />}
             label="Segunda"
+            style={{ color: roxoRosado }}
           />
           <FormControlLabel
             control={<Checkbox checked={filterValues.availableDays.tuesday} onChange={handleDayChange} name="tuesday" />}
             label="Terça"
+            style={{ color: roxoRosado }}
           />
           <FormControlLabel
             control={<Checkbox checked={filterValues.availableDays.wednesday} onChange={handleDayChange} name="wednesday" />}
             label="Quarta"
+            style={{ color: roxoRosado }}
           />
           <FormControlLabel
             control={<Checkbox checked={filterValues.availableDays.thursday} onChange={handleDayChange} name="thursday" />}
             label="Quinta"
+            style={{ color: roxoRosado }}
           />
           <FormControlLabel
             control={<Checkbox checked={filterValues.availableDays.friday} onChange={handleDayChange} name="friday" />}
             label="Sexta"
+            style={{ color: roxoRosado }}
           />
         </FormGroup>
         <FormControlLabel
           control={<Checkbox checked={filterValues.loyaltyProgram} onChange={handleLoyaltyChange} />}
           label="Programa de Fidelidade"
+          style={{ color: roxoRosado }}
         />
-        <div style={{ marginTop: 8 }}>
-          <InputLabel htmlFor="distance-slider">Distância Máxima (km): {filterValues.maxDistance}</InputLabel>
+      </FieldGroup>
+
+      <FieldGroup>
+        <FieldWrapper>
+          <InputLabel htmlFor="distance-slider" style={{ color: roxoRosado }}>Distância Máxima (km): {filterValues.maxDistance}</InputLabel>
           <Slider
             value={filterValues.maxDistance}
             onChange={handleDistanceChange}
             aria-labelledby="distance-slider"
             min={0}
             max={100}
+            fullWidth
+            style={{ color: roxoRosado }}
           />
-        </div>
-      </div>
+        </FieldWrapper>
+        <Button variant="contained" style={{ backgroundColor: roxoRosado, color: '#fff' }} onClick={handleSearch} fullWidth>
+          Buscar
+        </Button>
+      </FieldGroup>
 
-      {professionalsFound > 0 && <p>{professionalsFound} profissionais encontrados.</p>}
-      <ProfessionalContainer>
-        {professionals.map(professional => (
-          <ProfessionalCard key={professional.id}>
-            <AvailabilityCircle available={professional.available} /> {/* Círculo de disponibilidade */}
-            <Avatar src={professional.photoUrl || pessoaGenerica} alt={professional.name} sx={{ width: 100, height: 100, mb: 2 }} /> 
-            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1 }}> {/* Caixa para centralizar a avaliação */}
-              <Rating value={professional.rating} readOnly precision={0.5} /> 
-            </Box>
-            <h3>{professional.name}</h3>
-            <p>{professional.phone}</p>
-          </ProfessionalCard>
-        ))}
-      </ProfessionalContainer>
+      {professionals.length > 0 && <p>{professionals.length} profissionais encontrados.</p>}
     </SearchContainer>
   );
 };
 
 const App = () => {
-  const [bubbles, setBubbles] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterValues, setFilterValues] = useState({
+    value: '',
+    pricePerDay: '',
+    availability: '',
+    maxDistance: 50,
+    category: '',
+    availableDays: {
+      monday: false,
+      tuesday: false,
+      wednesday: false,
+      thursday: false,
+      friday: false
+    },
+    loyaltyProgram: false
+  });
+  const [searchBarTop, setSearchBarTop] = useState('50%');
+  const [professionals, setProfessionals] = useState([]);
+  const [showMap, setShowMap] = useState(false); // Estado para controlar a exibição do mapa
+  const [loading, setLoading] = useState(false); // Estado para o indicador de carregamento
+
+  const handleSearch = () => {
+    setLoading(true);
+    console.log("Pesquisando por:", searchQuery);
+    console.log("Filtros:", filterValues);
+
+    // Simulação de uma requisição de busca com um pequeno atraso
+    setTimeout(() => {
+      const found = Math.floor(Math.random() * 10);
+
+      const professionals = Array.from({ length: found }, (_, i) => ({
+        id: i + 1,
+        name: `Profissional ${i + 1}`,
+        photoUrl: i % 2 === 0 ? `https://i.pravatar.cc/150?img=${i + 1}` : null,
+        rating: Math.floor(Math.random() * 6),
+        phone: '555-1234',
+        available: i % 2 === 0,
+        position: {
+          lat: -22.5629 + Math.random() * 0.01,
+          lng: -47.4009 + Math.random() * 0.01
+        }
+      }));
+
+      setProfessionals(professionals);
+      setSearchBarTop('20%');
+      setShowMap(true); // Exibir o mapa após a busca
+      setLoading(false);
+    }, 1000);
+  };
+
+  useEffect(() => {
+    if (showMap) {
+      // Simular atualização dos profissionais com base na distância do filtro
+      const updatedProfessionals = professionals.filter(professional => {
+        // Calcular a distância entre a posição do profissional e o centro do mapa
+        const distance = Math.sqrt(
+          Math.pow(professional.position.lat - (-22.5629), 2) +
+          Math.pow(professional.position.lng - (-47.4009), 2)
+        );
+        return distance <= (filterValues.maxDistance / 111); // Aproximadamente 111 km por grau
+      });
+      setProfessionals(updatedProfessionals);
+    }
+  }, [filterValues.maxDistance, showMap]);
 
   return (
     <AppContainer>
-      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', paddingTop: '100px' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', flexGrow: 1, backgroundImage: `url(${clienteImagem})`, backgroundPosition: 'center', backgroundSize: 'cover', backgroundRepeat: 'no-repeat', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-          <Cliente />
-          {/* Renderizar bolhas de sabão */}
-          {bubbles}
+      <ContentContainer>
+        <Sidebar>
+          <Cliente
+            professionals={professionals}
+            handleSearch={handleSearch}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            filterValues={filterValues}
+            setFilterValues={setFilterValues}
+            searchBarTop={searchBarTop}
+          />
+          <ProfessionalListContainer>
+            {professionals.map(professional => (
+              <ProfessionalCard key={professional.id}>
+                <AvailabilityCircle available={professional.available} />
+                <Avatar src={professional.photoUrl || pessoaGenerica} alt={professional.name} sx={{ width: 100, height: 100, mb: 2 }} />
+                <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1 }}>
+                  <Rating value={professional.rating} readOnly precision={0.5} />
+                </Box>
+                <h3>{professional.name}</h3>
+                <p>{professional.phone}</p>
+                <Button variant="outlined" style={{ color: roxoRosado, borderColor: roxoRosado }}>Contatar</Button>
+              </ProfessionalCard>
+            ))}
+          </ProfessionalListContainer>
+        </Sidebar>
+        {showMap && ( // Exibir o mapa apenas após a busca
+          <MapWrapper>
+            <MapContainer center={[-22.5629, -47.4009]} zoom={13} style={{ height: "100%", width: "100%" }}>
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              />
+              <Circle
+                center={[-22.5629, -47.4009]}
+                radius={filterValues.maxDistance * 1000} // Convertendo km para metros
+                fillColor={roxoRosado}
+                color={roxoRosado}
+                fillOpacity={0.2}
+              />
+              {professionals.map(professional => (
+                <Marker key={professional.id} position={professional.position}>
+                  <Popup>
+                    <div>
+                      <h3>{professional.name}</h3>
+                      <p>{professional.phone}</p>
+                      <Rating value={professional.rating} readOnly precision={0.5} />
+                    </div>
+                  </Popup>
+                </Marker>
+              ))}
+            </MapContainer>
+          </MapWrapper>
+        )}
+      </ContentContainer>
+      <Footer>
+        &copy; 2024 Sua Empresa. Todos os direitos reservados.
+      </Footer>
+      {loading && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          backgroundColor: 'rgba(255, 255, 255, 0.7)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000,
+        }}>
+          <CircularProgress style={{ color: roxoRosado }} />
         </div>
-        <footer>
-          {/* Conteúdo do rodapé aqui */}
-        </footer>
-      </div>
+      )}
     </AppContainer>
   );
 };
