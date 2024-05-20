@@ -17,9 +17,13 @@ import Rating from '@mui/material/Rating/index.js';
 import HouseIcon from '@mui/icons-material/House.js';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
+// Configuração de cor roxo rosado
+const roxoRosado = '#b356a6';
+
 const locales = {
   'en-US': enUS,
 };
+
 const localizer = dateFnsLocalizer({
   format,
   parse,
@@ -29,17 +33,17 @@ const localizer = dateFnsLocalizer({
 });
 
 const Calendar = () => {
-  const [events, setEvents] = useState([]); // Initialize events state
+  const [events, setEvents] = useState([]); // Inicializa o estado dos eventos
 
   const handleSelectSlot = (slotInfo) => {
-    const dateStr = format(slotInfo.start, 'yyyy-MM-dd'); // Format the date as a string
+    const dateStr = format(slotInfo.start, 'yyyy-MM-dd'); // Formata a data como uma string
     const existingEventIndex = events.findIndex(event => format(event.start, 'yyyy-MM-dd') === dateStr);
 
     if (existingEventIndex > -1) {
-      // If event exists, remove it
+      // Se o evento existir, remove-o
       setEvents(prevEvents => prevEvents.filter((_, index) => index !== existingEventIndex));
     } else {
-      // If no event, add a new one
+      // Se não houver evento, adiciona um novo
       const newEvent = {
         title: 'Reserved',
         start: slotInfo.start,
@@ -52,7 +56,7 @@ const Calendar = () => {
 
   const eventStyleGetter = (event) => {
     const style = {
-      backgroundColor: event.isReserved ? '#ff0000' : '#3174ad',
+      backgroundColor: event.isReserved ? roxoRosado : '#3174ad',
       borderRadius: '0px',
       opacity: 0.8,
       color: 'white',
@@ -139,11 +143,11 @@ const Fornecedor = () => {
     <div role="presentation" onClick={toggleDrawer(false)} onKeyDown={toggleDrawer(false)}>
       <List>
         <ListItem button onClick={() => setSelectedView('chat')}>
-          <ListItemIcon><ChatBubbleIcon /></ListItemIcon>
+          <ListItemIcon><ChatBubbleIcon style={{ color: roxoRosado }} /></ListItemIcon>
           <ListItemText primary="Chat" />
         </ListItem>
         <ListItem button onClick={() => setSelectedView('agenda')}>
-          <ListItemIcon><CalendarTodayIcon /></ListItemIcon>
+          <ListItemIcon><CalendarTodayIcon style={{ color: roxoRosado }} /></ListItemIcon>
           <ListItemText primary="Agenda" />
         </ListItem>
       </List>
@@ -158,7 +162,7 @@ const Fornecedor = () => {
       </Drawer>
 
       <div style={{ flexGrow: 1 }}>
-        <AppBar position="static">
+        <AppBar position="static" style={{ backgroundColor: roxoRosado }}>
           <Toolbar>
             <IconButton edge="start" color="inherit" aria-label="menu" onClick={toggleDrawer(true)}>
               <MenuIcon />

@@ -1,5 +1,3 @@
-// SignUpPage/index.js
-
 import React, { useState, useEffect } from 'react';
 import styled, { css } from 'styled-components';
 import axios from 'axios';
@@ -24,12 +22,14 @@ const SignUpForm = styled.form`
   border-radius: 8px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
   width: 800px;
+  border: 2px solid #b356a6; /* Borda com a cor principal */
 `;
 
 const Title = styled.h1`
   text-align: center;
   margin-bottom: 20px;
   grid-column: span 2;
+  color: #b356a6; /* Título com a cor principal */
 `;
 
 const inputStyles = css`
@@ -56,7 +56,7 @@ const Select = styled.select`
 
 const Button = styled.button`
   grid-column: span 2;
-  background-color: #007bff;
+  background-color: #b356a6; /* Botão com a cor principal */
   color: #fff;
   padding: 10px;
   border: none;
@@ -65,7 +65,7 @@ const Button = styled.button`
   transition: background-color 0.3s ease;
 
   &:hover {
-    background-color: #0056b3;
+    background-color: #8e3d83; /* Cor de fundo do botão ao passar o mouse */
   }
 `;
 
@@ -114,6 +114,7 @@ const SignUpPage = () => {
       dateFormat: 'dd/mm/yy',
       changeMonth: true,
       changeYear: true,
+      yearRange: '-100:+0' // Permite selecionar datas de até 100 anos atrás até o ano atual
     });
   }, []);
 
@@ -123,7 +124,7 @@ const SignUpPage = () => {
   };
 
   const handleCEPChange = async (event) => {
-    const cep = event.target.value.replace(/\D/g, ''); // Remove non-numeric characters
+    const cep = event.target.value.replace(/\D/g, ''); // Remove caracteres não numéricos
     setUserData({ ...userData, cep }); // Atualiza o CEP em tempo real
   
     if (cep.length === 8) {
@@ -158,9 +159,11 @@ const SignUpPage = () => {
       setErrors({ ...errors, cep: null });
     }
   };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (validateForm()) {
+      const formattedDate = formatData(userData.dataNascimento);
       const requestBody = {
         nomeusuario: userData.nome,
         Telefone: userData.telefone,
@@ -173,23 +176,20 @@ const SignUpPage = () => {
         Endereco: userData.endereco,
         Cidade: userData.cidade,
         Estado: userData.estado,
-        DataDeNascimento: formatData(userData.dataNascimento) // Formate conforme necessário
+        DataDeNascimento: formattedDate // Formate conforme necessário
       };
       try {
         const response = await axios.post('http://localhost:8000/usuarios', requestBody);
         console.log('Cadastro realizado com sucesso:', response.data);
         window.location.href = 'http://localhost:3000/';
       } catch (error) {
-        // Verifica se a resposta e os dados estão disponíveis
         const errorMessage = error.response && error.response.data && error.response.data.message
           ? error.response.data.message
           : 'Erro desconhecido ao enviar dados. Por favor, tente novamente.';
-        alert(errorMessage); // Substitua pelo método de exibição de erro que preferir
+        alert(errorMessage);
       }
     }
   };
-  
-  
 
   const validateForm = () => {
     const { nome, email, senha, confirmarSenha, tipoUsuario, cpf, dataNascimento } = userData;
@@ -234,11 +234,13 @@ const SignUpPage = () => {
     setErrors(errors);
     return isValid;
   };
+
   // Função para formatar a data para o formato ISO yyyy-mm-dd
   const formatData = (data) => {
     const parts = data.split('/');
     return `${parts[2]}-${parts[1]}-${parts[0]}`; // Converte dd/mm/yyyy para yyyy-mm-dd
   };
+
   return (
     <SignUpPageContainer>
       <SignUpForm onSubmit={handleSubmit}>

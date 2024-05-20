@@ -12,6 +12,7 @@ import Cliente from './componentes/Cliente/index.js';
 import Fornecedor from './componentes/Fornecedor/index.js';
 import ChatContainer from './componentes/ChatContainer/index.js'; 
 import LoginPage from './componentes/Login/index.js'; 
+import QuemSomos from './componentes/QuemSomos/index.js'; 
 
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './componentes/ProtectedRoute';
@@ -28,6 +29,7 @@ const GlobalStyle = createGlobalStyle`
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    background-color: #f8f9fa;
   }
 
   code {
@@ -40,34 +42,47 @@ const GlobalStyle = createGlobalStyle`
   }
 `;
 
-const Content = styled.div`
-  flex: 1;
-  padding-top: 60px; /* Ajuste o espaçamento superior para acomodar o header fixo */
-  padding-bottom: 20px; /* Ajuste o espaçamento inferior conforme necessário */
-  overflow-y: auto; /* Adiciona uma barra de rolagem vertical se o conteúdo for maior que a altura disponível */
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 `;
 
-ReactDOM.render(
+const Content = styled.div`
+  flex: 1;
+  padding-top: 30px;
+  padding-bottom: 0px;
+  overflow-y: auto;
+
+  @media (max-width: 768px) {
+    padding-top: 15px;
+  }
+`;
+
+const App = () => (
   <React.StrictMode>
     <AuthProvider>
       <GlobalStyle />
       <BrowserRouter>
-        <Header />
-        <Content>
-          <Routes>
-            <Route path='/signup' element={<SignUpPage />} />
-            <Route path='/login' element={<LoginPage />} />
-            <Route path='/' element={<Home />} />
-            <Route element={<ProtectedRoute />}>
-              <Route path='/cliente' element={<Cliente />} />
-              <Route path='/fornecedor' element={<Fornecedor />} />
-              <Route path='/chat' element={<ChatContainer />} />
-            </Route>
-          </Routes>
-        </Content>
-        <Footer />
+        <Container>
+          <Header />
+          <Content>
+            <Routes>
+              <Route path='/signup' element={<SignUpPage />} />
+              <Route path='/login' element={<LoginPage />} />
+              <Route path="/quem-somos" element={<QuemSomos />} />
+              <Route path='/' element={<Home />} />
+              <Route element={<ProtectedRoute />}>
+                <Route path='/cliente' element={<Cliente />} />
+                <Route path='/fornecedor' element={<Fornecedor />} />
+                <Route path='/chat' element={<ChatContainer />} />
+              </Route>
+            </Routes>
+          </Content>
+        </Container>
       </BrowserRouter>
     </AuthProvider>
-  </React.StrictMode>,
-  document.getElementById('root')
+  </React.StrictMode>
 );
+
+ReactDOM.render(<App />, document.getElementById('root'));

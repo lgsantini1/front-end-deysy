@@ -50,6 +50,10 @@ const SearchContainer = styled.div`
   width: 100%;
   max-width: 500px;
   margin-bottom: 20px;
+
+  @media (max-width: 600px) {
+    padding: 10px;
+  }
 `;
 
 const FieldGroup = styled.div`
@@ -79,6 +83,7 @@ const ProfessionalListContainer = styled.div`
   border-radius: 10px;
   padding: 20px;
   margin-right: 20px;
+  display: ${props => props.hidden ? 'none' : 'block'};
 
   @media (max-width: 768px) {
     max-height: none;
@@ -138,10 +143,10 @@ const AppContainer = styled.div`
   background-size: cover;
   background-repeat: no-repeat;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   position: relative;
   overflow: hidden;
-  padding: 20px;
+  padding: 10px;
 `;
 
 const ContentContainer = styled.div`
@@ -163,22 +168,22 @@ const Sidebar = styled.div`
   display: flex;
   flex-direction: column;
   width: 45%;
-  padding: 20px;
+  padding: 5px;
 
   @media (max-width: 1200px) {
     width: 100%;
   }
 `;
 
-const Footer = styled.footer`
-  padding: 20px;
-  background: #333;
-  color: #fff;
-  text-align: center;
-  width: 100%;
-`;
-
-const Cliente = ({ professionals, handleSearch, searchQuery, setSearchQuery, filterValues, setFilterValues, searchBarTop }) => {
+const Cliente = ({
+  professionals,
+  handleSearch,
+  searchQuery,
+  setSearchQuery,
+  filterValues,
+  setFilterValues,
+  searchBarTop
+}) => {
 
   const handleDayChange = (event) => {
     setFilterValues({
@@ -339,7 +344,7 @@ const App = () => {
       const professionals = Array.from({ length: found }, (_, i) => ({
         id: i + 1,
         name: `Profissional ${i + 1}`,
-        photoUrl: i % 2 === 0 ? `https://i.pravatar.cc/150?img=${i + 1}` : null,
+        photoUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${i + 1}`,
         rating: Math.floor(Math.random() * 6),
         phone: '555-1234',
         available: i % 2 === 0,
@@ -384,20 +389,22 @@ const App = () => {
             setFilterValues={setFilterValues}
             searchBarTop={searchBarTop}
           />
-          <ProfessionalListContainer>
-            {professionals.map(professional => (
-              <ProfessionalCard key={professional.id}>
-                <AvailabilityCircle available={professional.available} />
-                <Avatar src={professional.photoUrl || pessoaGenerica} alt={professional.name} sx={{ width: 100, height: 100, mb: 2 }} />
-                <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1 }}>
-                  <Rating value={professional.rating} readOnly precision={0.5} />
-                </Box>
-                <h3>{professional.name}</h3>
-                <p>{professional.phone}</p>
-                <Button variant="outlined" style={{ color: roxoRosado, borderColor: roxoRosado }}>Contatar</Button>
-              </ProfessionalCard>
-            ))}
-          </ProfessionalListContainer>
+          {professionals.length > 0 && (
+            <ProfessionalListContainer hidden={professionals.length === 0}>
+              {professionals.map(professional => (
+                <ProfessionalCard key={professional.id}>
+                  <AvailabilityCircle available={professional.available} />
+                  <Avatar src={professional.photoUrl || pessoaGenerica} alt={professional.name} sx={{ width: 100, height: 100, mb: 2 }} />
+                  <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1 }}>
+                    <Rating value={professional.rating} readOnly precision={0.5} />
+                  </Box>
+                  <h3>{professional.name}</h3>
+                  <p>{professional.phone}</p>
+                  <Button variant="outlined" style={{ color: roxoRosado, borderColor: roxoRosado }}>Contatar</Button>
+                </ProfessionalCard>
+              ))}
+            </ProfessionalListContainer>
+          )}
         </Sidebar>
         {showMap && ( // Exibir o mapa apenas após a busca
           <MapWrapper>
@@ -417,6 +424,7 @@ const App = () => {
                 <Marker key={professional.id} position={professional.position}>
                   <Popup>
                     <div>
+                      <Avatar src={professional.photoUrl || pessoaGenerica} alt={professional.name} sx={{ width: 60, height: 60, mb: 2 }} />
                       <h3>{professional.name}</h3>
                       <p>{professional.phone}</p>
                       <Rating value={professional.rating} readOnly precision={0.5} />
@@ -428,9 +436,6 @@ const App = () => {
           </MapWrapper>
         )}
       </ContentContainer>
-      <Footer>
-        &copy; 2024 Sua Empresa. Todos os direitos reservados.
-      </Footer>
       {loading && (
         <div style={{
           position: 'fixed',

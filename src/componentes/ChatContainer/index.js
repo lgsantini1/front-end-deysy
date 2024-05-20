@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { useAuth } from '../../contexts/AuthContext';
+
+const primaryColor = '#b356a6';
+const secondaryColor = '#d1b3d4';
 
 const ChatContainer = styled.div`
   display: flex;
@@ -19,16 +23,9 @@ const Message = styled.div`
   padding: 8px;
   border-radius: 5px;
   display: flex;
-
-  &.user {
-    background-color: #dcf8c6;
-    align-self: flex-end;
-  }
-
-  &.assistant {
-    background-color: #fff;
-    align-self: flex-start;
-  }
+  background-color: ${props => props.index % 2 === 0 ? primaryColor : secondaryColor};
+  color: ${props => props.index % 2 === 0 ? 'white' : 'black'};
+  align-self: ${props => props.role === 'user' ? 'flex-end' : 'flex-start'};
 `;
 
 const MessageRole = styled.span`
@@ -59,7 +56,7 @@ const InputField = styled.input`
 
 const SendButton = styled.button`
   padding: 10px;
-  background-color: #0084ff;
+  background-color: ${primaryColor};
   color: white;
   border: none;
   border-radius: 5px;
@@ -69,11 +66,12 @@ const SendButton = styled.button`
 function Chat() {
   const [messages, setMessages] = useState([]);
   const [userInput, setUserInput] = useState('');
+  const { user } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const newMessage = { role: 'user', content: userInput, timestamp: Date.now() };
+    const usuario = user.nome;
+    const newMessage = { role: usuario, content: userInput, timestamp: Date.now() };
     setMessages((prevMessages) => [...prevMessages, newMessage]);
 
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -84,7 +82,7 @@ function Chat() {
       },
       body: JSON.stringify({
         messages: [{ role: 'user', content: userInput }],
-        model: 'mixtral-8x7b-32768',
+        model: 'llama3-70b-8192',
       }),
     });
 
@@ -92,7 +90,7 @@ function Chat() {
 
     if (data && data.choices && data.choices[0] && data.choices[0].message) {
       const assistantContent = data.choices[0].message.content; 
-      setMessages((prevMessages) => [...prevMessages, { role: 'assistant', content: assistantContent, timestamp: Date.now() }]);
+      setMessages((prevMessages) => [...prevMessages, { role: 'Nome do Cliente', content: assistantContent, timestamp: Date.now() }]);
     } else {
       console.error('Unexpected response format from OpenAI API');
     }
@@ -111,13 +109,11 @@ function Chat() {
     <ChatContainer>
       <ChatHistory>
         {messages.map((message, index) => (
-          <React.Fragment key={index}>
-            <Message className={message.role}>
-              <MessageRole>{message.role}:</MessageRole>
-              <MessageContent>{message.content}</MessageContent>
-              <Timestamp>{formatTimestamp(message.timestamp)}</Timestamp>
-            </Message>
-          </React.Fragment>
+          <Message key={index} role={message.role} index={index}>
+            <MessageRole>{message.role}:</MessageRole>
+            <MessageContent>{message.content}</MessageContent>
+            <Timestamp>{formatTimestamp(message.timestamp)}</Timestamp>
+          </Message>
         ))}
       </ChatHistory>
 
