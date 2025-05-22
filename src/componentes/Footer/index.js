@@ -24,7 +24,39 @@ background-color: #0E3242;
 const Column = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: center; /* Default alignment */
+`;
+
+const TextColumn = styled(Column)`
+  align-items: flex-start; /* Override for text links column */
+`;
+
+const ColumnTitle = styled.h3`
+  color: #fff;
+  font-size: 16px;
+  margin-bottom: 15px;
+  text-align: center; /* Default for titles */
+`;
+
+const TextColumnTitle = styled(ColumnTitle)`
+  text-align: left; /* Override for text links column title */
+`;
+
+const TextLink = styled.p`
+  color: #fff;
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: text-decoration 0.2s ease-in-out;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:last-child {
+    margin-bottom: 0;
+  }
 `;
 
 const SocialIconsContainer = styled.div`
@@ -55,16 +87,18 @@ const StoreIcon = styled.img`
 const Footer = () => {
   return (
     <FooterContainer>
-      <Column>
+      <TextColumn>
+        <TextColumnTitle>Informações</TextColumnTitle>
         <div>
-          <p>Quem Somos</p>
-          <p>Relação com Investidores</p>
-          <p>Trabalhe Conosco</p>
-          <p>Profissionais Verificados</p>
-          <p>Mapa do Site</p>
+          <TextLink>Quem Somos</TextLink>
+          <TextLink>Relação com Investidores</TextLink>
+          <TextLink>Trabalhe Conosco</TextLink>
+          <TextLink>Profissionais Verificados</TextLink>
+          <TextLink>Mapa do Site</TextLink>
         </div>
-      </Column>
+      </TextColumn>
       <Column>
+        <ColumnTitle>Siga-nos</ColumnTitle>
         <SocialIconsContainer>
           <SocialIconLink href="https://www.facebook.com">
             <Icon src={facebookIcon} alt="Facebook" />
@@ -78,6 +112,7 @@ const Footer = () => {
         </SocialIconsContainer>
       </Column>
       <Column>
+        <ColumnTitle>Baixe o App</ColumnTitle>
         <StoreLink href="#">
           <StoreIcon src={googlePlayIcon} alt="Google Play" />
         </StoreLink>

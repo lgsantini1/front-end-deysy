@@ -92,7 +92,7 @@ const LoginFormWrapper = styled.div`
 `;
 
 const LoginForm = styled.form`
-  background-color: rgba(255, 255, 255, 0.6); 
+  background-color: rgba(255, 255, 255, 0.85); /* Increased opacity */
   padding: 40px;
   border-radius: 20px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
@@ -110,7 +110,7 @@ const LoginForm = styled.form`
 const Title = styled.h1`
   text-align: center;
   margin-bottom: 20px;
-  color: #b356a6; /* Cor do título */
+  color: #b356a6; /* Cor do título - Remains the same, good contrast on light bg */
 `;
 
 const Button = styled.button`
@@ -138,12 +138,12 @@ const SignUpContainer = styled.div`
 
 const SignUpText = styled.span`
   margin-right: 5px;
-  color: #fff;
+  color: #0E3242; /* Changed for better contrast against background image */
 `;
 
 const SignUpLink = styled.a`
   text-decoration: none;
-  color: #fff;
+  color: #0E3242; /* Changed for better contrast against background image */
   cursor: pointer;
 `;
 
@@ -165,25 +165,7 @@ const StyledInput = styled(Input)`
   }
 `;
 
-const LoginImageContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 20px;
-  width: 100%;
-`;
-
-const LoginImage = styled.img`
-  max-width: 200px;  /* Aumenta o tamanho máximo da imagem */
-  max-height: 200px; /* Aumenta o tamanho máximo da imagem */
-  opacity: 0.8;      /* Define a transparência da imagem */
-  border-radius: 15px;
-
-  @media (max-width: 768px) {
-    max-width: 150px;
-    max-height: 150px;
-  }
-`;
+// LoginImageContainer and LoginImage styled components are removed.
 
 const LoginPage = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -222,12 +204,10 @@ const LoginPage = () => {
       <GlobalStyle />
       <LoginContainer>
         <LoginFormWrapper>
-          <LoginImageContainer>
-            <LoginImage src={loginImage} alt="Login Image" />
-          </LoginImageContainer>
+          {/* LoginImageContainer and LoginImage usage is removed. */}
           <LoginForm onSubmit={handleSubmit}>
             <Title>Qual o seu número de telefone?</Title>
-            <label htmlFor="phone">Telefone</label>
+            <label htmlFor="phone" style={{ color: '#0E3242' }}>Telefone</label>
             <StyledInput
               id="phone"
               type="tel"
@@ -235,7 +215,7 @@ const LoginPage = () => {
               value={phoneNumber}
               onChange={handlePhoneNumberChange}
             />
-            <label htmlFor="password">Senha</label>
+            <label htmlFor="password" style={{ color: '#0E3242' }}>Senha</label>
             <StyledInput
               id="password"
               type="password"
