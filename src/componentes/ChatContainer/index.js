@@ -23,9 +23,12 @@ const Message = styled.div`
   padding: 8px;
   border-radius: 5px;
   display: flex;
-  background-color: ${props => props.index % 2 === 0 ? primaryColor : secondaryColor};
-  color: ${props => props.index % 2 === 0 ? 'white' : 'black'};
-  align-self: ${props => props.role === 'user' ? 'flex-end' : 'flex-start'};
+  /* User messages (not 'Assistente') get primaryColor, Assistente gets secondaryColor */
+  background-color: ${props => props.role === 'Assistente' ? secondaryColor : primaryColor};
+  /* Text color based on background */
+  color: ${props => props.role === 'Assistente' ? 'black' : 'white'};
+  /* Assistente on left, user on right */
+  align-self: ${props => props.role === 'Assistente' ? 'flex-start' : 'flex-end'};
 `;
 
 const MessageRole = styled.span`
@@ -78,7 +81,7 @@ function Chat() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer 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', 
+        'Authorization': `Bearer ${process.env.REACT_APP_GROQ_API_KEY}`, 
       },
       body: JSON.stringify({
         messages: [{ role: 'user', content: userInput }],
@@ -90,7 +93,7 @@ function Chat() {
 
     if (data && data.choices && data.choices[0] && data.choices[0].message) {
       const assistantContent = data.choices[0].message.content; 
-      setMessages((prevMessages) => [...prevMessages, { role: 'Nome do Cliente', content: assistantContent, timestamp: Date.now() }]);
+      setMessages((prevMessages) => [...prevMessages, { role: 'Assistente', content: assistantContent, timestamp: Date.now() }]);
     } else {
       console.error('Unexpected response format from OpenAI API');
     }

@@ -12,7 +12,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 const HeaderContainer = styled.header`
     background-color: #0E3242;
     display: flex;
-    justify-content: flex-start; /* Alinha os elementos à esquerda */
+    justify-content: space-between; /* Changed to space-between */
     align-items: center; /* Para alinhar verticalmente */
     position: fixed;
     top: 0;
@@ -35,8 +35,13 @@ const PageContent = styled.div`
 const WelcomeMessage = styled.div`
     font-size: 20px;
     color: white;
-    margin-left: auto; /* Empurra a mensagem para o lado direito */
-    margin-right: 50px; /* Espaçamento à direita */
+    /* margin-left: auto; Removed as RightSideContainer handles positioning */
+    margin-right: 20px; /* Adjusted spacing */
+`;
+
+const RightSideContainer = styled.div`
+    display: flex;
+    align-items: center;
 `;
 
 const MenuLink = styled(Link)`
@@ -78,10 +83,12 @@ export default function Header() {
                 <Link to='/'>
                     <Logo />
                 </Link>
-                <StyledIconButton edge="end" aria-label="menu" onClick={handleMenuClick}>
-                    <MenuIcon />
-                </StyledIconButton>
-                {user && <WelcomeMessage>Olá, {user.nome}. Seja Bem-vindo!</WelcomeMessage>}
+                <RightSideContainer>
+                    {user && <WelcomeMessage>Olá, {user.nome}. Seja Bem-vindo!</WelcomeMessage>}
+                    <StyledIconButton edge="end" aria-label="menu" onClick={handleMenuClick}>
+                        <MenuIcon />
+                    </StyledIconButton>
+                </RightSideContainer>
                 <Menu
                     anchorEl={anchorEl}
                     open={Boolean(anchorEl)}
